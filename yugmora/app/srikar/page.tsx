@@ -55,6 +55,8 @@ export default function SrikarAdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [passcode, setPasscode] = useState("");
   const [authError, setAuthError] = useState("");
+  const [authLoading, setAuthLoading] = useState(false);
+  const [sessionChecked, setSessionChecked] = useState(false);
 
   // Active Tab
   type TabType =
@@ -76,12 +78,17 @@ export default function SrikarAdminPage() {
   const [submissions, setSubmissions] = useState<PartnerSubmission[]>([]);
   const [loadingSubmissions, setLoadingSubmissions] = useState(false);
 
-  // Check existing session
+  // Check existing session via server-side cookie validation
   useEffect(() => {
-    const sessionAuth = sessionStorage.getItem("srikar_auth_token");
-    if (sessionAuth === "granted") {
-      setIsAuthenticated(true);
-    }
+    fetch("/api/admin/session", { credentials: "include" })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.authenticated) {
+          setIsAuthenticated(true);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setSessionChecked(true));
   }, []);
 
   // Fetch partner submissions when tab is active
@@ -100,20 +107,45 @@ export default function SrikarAdminPage() {
     }
   }, [activeTab, isAuthenticated]);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const clean = passcode.trim().toLowerCase();
-    if (clean === "yugmora2026" || clean === "srikar2026" || clean === "srikar" || clean === "admin") {
-      setIsAuthenticated(true);
-      sessionStorage.setItem("srikar_auth_token", "granted");
-      setAuthError("");
-    } else {
-      setAuthError("ACCESS DENIED: Invalid Passcode.");
+    setAuthLoading(true);
+    setAuthError("");
+
+    try {
+      const res = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ passcode: passcode.trim() }),
+      });
+
+      const data = await res.json();
+
+      if (res.status === 429) {
+        setAuthError("RATE LIMITED: Too many attempts. Wait 60 seconds.");
+      } else if (res.ok && data.success) {
+        setIsAuthenticated(true);
+        setAuthError("");
+      } else {
+        setAuthError("ACCESS DENIED: Invalid Passcode.");
+      }
+    } catch {
+      setAuthError("CONNECTION ERROR: Could not reach server.");
+    } finally {
+      setAuthLoading(false);
     }
   };
 
-  const handleLogout = () => {
-    sessionStorage.removeItem("srikar_auth_token");
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/admin/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch {
+      // Logout even if the API call fails
+    }
     setIsAuthenticated(false);
   };
 
@@ -147,6 +179,15 @@ export default function SrikarAdminPage() {
   // ==========================================
   // PASSCODE LOCK SCREEN
   // ==========================================
+  // Show loading state while checking session
+  if (!sessionChecked) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#030712]">
+        <div className="text-neon-cyan font-mono text-sm animate-pulse">Verifying session...</div>
+      </div>
+    );
+  }
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-[#030712] relative overflow-hidden">
@@ -196,15 +237,16 @@ export default function SrikarAdminPage() {
 
             <button
               type="submit"
-              className="w-full neon-btn neon-btn--primary py-3 text-sm font-mono uppercase tracking-wider"
+              disabled={authLoading}
+              className="w-full neon-btn neon-btn--primary py-3 text-sm font-mono uppercase tracking-wider disabled:opacity-50 disabled:cursor-wait"
             >
-              Authorize Access
+              {authLoading ? "Authenticating..." : "Authorize Access"}
             </button>
           </form>
 
           <div className="mt-6 pt-4 border-t border-line/40 text-center">
             <p className="font-mono text-[11px] text-text-muted/60">
-              Passcode hint: <span className="text-text-muted">yugmora2026</span>
+              Authorized personnel only
             </p>
           </div>
         </div>

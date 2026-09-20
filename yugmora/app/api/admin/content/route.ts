@@ -1,5 +1,7 @@
 // app/api/admin/content/route.ts — Live Content Storage & Persistence Endpoint
+// GET is public (serves content to landing page), POST is admin-only
 import { NextResponse } from "next/server";
+import { isAdminAuthenticated } from "@/lib/auth";
 import fs from "fs";
 import path from "path";
 
@@ -41,6 +43,7 @@ function writeSavedContent(content: Record<string, unknown> | null) {
   }
 }
 
+// GET remains public — it serves content to the landing page
 export async function GET() {
   const content = readSavedContent();
   return NextResponse.json({
@@ -49,7 +52,17 @@ export async function GET() {
   });
 }
 
+// POST requires admin authentication
 export async function POST(request: Request) {
+  // ▶ AUTH GUARD
+  const authed = await isAdminAuthenticated();
+  if (!authed) {
+    return NextResponse.json(
+      { success: false, error: "Unauthorized" },
+      { status: 401 }
+    );
+  }
+
   try {
     const body = await request.json();
 

@@ -1,6 +1,8 @@
 // app/api/partner/route.ts — Partnership enquiry submission & retrieval endpoint
+// POST is public (visitor form submissions), GET and PATCH are admin-only
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { isAdminAuthenticated } from "@/lib/auth";
 import fs from "fs";
 import path from "path";
 
@@ -58,7 +60,17 @@ function saveSubmissions(list: PartnerSubmission[]) {
   }
 }
 
+// GET requires admin authentication — exposes PII
 export async function GET() {
+  // ▶ AUTH GUARD
+  const authed = await isAdminAuthenticated();
+  if (!authed) {
+    return NextResponse.json(
+      { success: false, error: "Unauthorized" },
+      { status: 401 }
+    );
+  }
+
   const submissions = getSubmissions();
   return NextResponse.json({
     success: true,
@@ -66,6 +78,7 @@ export async function GET() {
   });
 }
 
+// POST remains public — visitor form submissions
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -108,7 +121,17 @@ export async function POST(request: Request) {
   }
 }
 
+// PATCH requires admin authentication
 export async function PATCH(request: Request) {
+  // ▶ AUTH GUARD
+  const authed = await isAdminAuthenticated();
+  if (!authed) {
+    return NextResponse.json(
+      { success: false, error: "Unauthorized" },
+      { status: 401 }
+    );
+  }
+
   try {
     const body = await request.json();
     if (!body.id || !body.status) {
