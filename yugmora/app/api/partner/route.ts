@@ -138,7 +138,26 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ success: false, error: "Missing id or status" }, { status: 400 });
     }
 
+    // ▶ STATUS ENUM VALIDATION — only allow known values
+    const VALID_STATUSES = ["new", "contacted", "approved", "archived"] as const;
+    if (!VALID_STATUSES.includes(body.status)) {
+      return NextResponse.json(
+        { success: false, error: `Invalid status. Must be one of: ${VALID_STATUSES.join(", ")}` },
+        { status: 400 }
+      );
+    }
+
     const current = getSubmissions();
+
+    // ▶ RECORD EXISTENCE CHECK — ensure the submission actually exists
+    const targetExists = current.some((sub) => sub.id === body.id);
+    if (!targetExists) {
+      return NextResponse.json(
+        { success: false, error: "Submission not found" },
+        { status: 404 }
+      );
+    }
+
     const updated = current.map((sub) =>
       sub.id === body.id ? { ...sub, status: body.status } : sub
     );
@@ -149,3 +168,4 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ success: false, error: (err as Error).message }, { status: 500 });
   }
 }
+
