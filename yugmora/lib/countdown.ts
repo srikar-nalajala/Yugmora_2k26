@@ -9,10 +9,20 @@ export type CountdownValues = {
   isExpired: boolean;
 };
 
-export function getCountdown(targetISO: string): CountdownValues {
+export function getCountdown(targetISO?: string | null): CountdownValues {
+  if (!targetISO) {
+    return {
+      days: 0,
+      hours: 0,
+      minutes: 0,
+      seconds: 0,
+      total: 0,
+      isExpired: true,
+    };
+  }
   const now = Date.now();
   const target = new Date(targetISO).getTime();
-  const total = Math.max(0, target - now);
+  const total = isNaN(target) ? 0 : Math.max(0, target - now);
   const isExpired = total <= 0;
 
   return {

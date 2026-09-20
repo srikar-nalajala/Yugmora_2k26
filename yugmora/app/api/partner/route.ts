@@ -1,6 +1,8 @@
-// app/api/partner/route.ts — Partnership enquiry submission endpoint
+// app/api/partner/route.ts — Partnership enquiry submission & retrieval endpoint
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import fs from "fs";
+import path from "path";
 
 const partnerSchema = z.object({
   name: z.string().min(2),
@@ -12,10 +14,73 @@ const partnerSchema = z.object({
   message: z.string().min(10),
 });
 
+export interface PartnerSubmission {
+  id: string;
+  createdAt: string;
+  name: string;
+  company: string;
+  role: string;
+  email: string;
+  phone: string;
+  partnershipType: string;
+  message: string;
+  status: "new" | "contacted" | "approved" | "archived";
+}
+
+let memorySubmissions: PartnerSubmission[] = [];
+
+const DATA_DIR = path.join(process.cwd(), "data");
+const SUBMISSIONS_FILE = path.join(DATA_DIR, "partner_submissions.json");
+
+function getSubmissions(): PartnerSubmission[] {
+  if (memorySubmissions.length > 0) return memorySubmissions;
+  try {
+    if (fs.existsSync(SUBMISSIONS_FILE)) {
+      const raw = fs.readFileSync(SUBMISSIONS_FILE, "utf-8");
+      memorySubmissions = JSON.parse(raw);
+      return memorySubmissions;
+    }
+  } catch (err) {
+    console.warn("Could not read submissions from file:", err);
+  }
+  return memorySubmissions;
+}
+
+function saveSubmissions(list: PartnerSubmission[]) {
+  memorySubmissions = list;
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+    fs.writeFileSync(SUBMISSIONS_FILE, JSON.stringify(list, null, 2), "utf-8");
+  } catch (err) {
+    console.warn("Could not write submissions to disk:", err);
+  }
+}
+
+export async function GET() {
+  const submissions = getSubmissions();
+  return NextResponse.json({
+    success: true,
+    submissions: submissions,
+  });
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     const validated = partnerSchema.parse(body);
+
+    const newSubmission: PartnerSubmission = {
+      id: `SUB-${Date.now().toString(36).toUpperCase()}`,
+      createdAt: new Date().toISOString(),
+      ...validated,
+      status: "new",
+    };
+
+    const current = getSubmissions();
+    current.unshift(newSubmission);
+    saveSubmissions(current);
 
     const webhookUrl = process.env.PARTNER_FORM_ENDPOINT;
     if (webhookUrl) {
@@ -40,5 +105,24 @@ export async function POST(request: Request) {
       { success: false, error: "Invalid form submission" },
       { status: 400 }
     );
+  }
+}
+
+export async function PATCH(request: Request) {
+  try {
+    const body = await request.json();
+    if (!body.id || !body.status) {
+      return NextResponse.json({ success: false, error: "Missing id or status" }, { status: 400 });
+    }
+
+    const current = getSubmissions();
+    const updated = current.map((sub) =>
+      sub.id === body.id ? { ...sub, status: body.status } : sub
+    );
+    saveSubmissions(updated);
+
+    return NextResponse.json({ success: true, message: "Submission updated" });
+  } catch (err: unknown) {
+    return NextResponse.json({ success: false, error: (err as Error).message }, { status: 500 });
   }
 }

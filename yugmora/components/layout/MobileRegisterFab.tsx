@@ -1,12 +1,15 @@
 // components/layout/MobileRegisterFab.tsx — Floating Register button on mobile
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useScrollStore } from "@/hooks/useScrollStore";
 import { event } from "@/content/event";
 import { trackEvent } from "@/lib/analytics";
 
 export function MobileRegisterFab() {
+  const pathname = usePathname();
   const scrollY = useScrollStore((s) => s.scrollY);
+  if (pathname?.startsWith("/srikar")) return null;
   const isVisible = scrollY > 600; // Show after scrolling past hero
 
   return (

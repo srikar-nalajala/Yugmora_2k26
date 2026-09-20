@@ -2,14 +2,17 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { workshops, workshopTakeaways } from "@/content/workshops";
+import { workshopTakeaways } from "@/content/workshops";
 import { speakers } from "@/content/speakers";
+import { useLiveContent } from "@/context/LiveContentContext";
 import { fadeInUp, staggerContainer } from "@/lib/motion";
 import { ShowcaseCarousel } from "@/components/showcase/ShowcaseCarousel";
 import { SpeakerCard } from "@/components/showcase/SpeakerCard";
 import type { Speaker } from "@/content/types";
 
 export function Workshops() {
+  const { content } = useLiveContent();
+  const workshops = content.workshops;
   return (
     <section id="workshops" className="py-20 lg:py-32 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">

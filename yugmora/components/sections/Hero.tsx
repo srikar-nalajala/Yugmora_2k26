@@ -3,24 +3,24 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { hero } from "@/content/hero";
-import { event, keyNumbers } from "@/content/event";
+import { useLiveContent } from "@/context/LiveContentContext";
 import { getCountdown, padTwo } from "@/lib/countdown";
 import { trackEvent } from "@/lib/analytics";
 import { fadeInUp, staggerContainer } from "@/lib/motion";
 
-function CountdownDisplay() {
-  const [countdown, setCountdown] = useState(getCountdown(event.eventStartISO));
+function CountdownDisplay({ eventStartISO }: { eventStartISO?: string }) {
+  const [countdown, setCountdown] = useState(getCountdown(eventStartISO));
 
   useEffect(() => {
-    if (!event.eventStartISO) return;
+    setCountdown(getCountdown(eventStartISO));
+    if (!eventStartISO) return;
     const interval = setInterval(() => {
-      setCountdown(getCountdown(event.eventStartISO));
+      setCountdown(getCountdown(eventStartISO));
     }, 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [eventStartISO]);
 
-  if (!event.eventStartISO) {
+  if (!eventStartISO) {
     return (
       <div className="flex items-center gap-4 font-mono">
         {["Days", "Hours", "Minutes"].map((label) => (
@@ -71,16 +71,16 @@ function CountdownDisplay() {
   );
 }
 
-function KeyNumbersStrip() {
+function KeyNumbersStrip({ items }: { items: { prefix?: string; value: string | number; suffix?: string; label: string }[] }) {
   return (
     <div className="w-full border-t border-b border-line py-6">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6">
-          {keyNumbers.map((item, i) => (
+          {items.map((item, i) => (
             <div key={i} className="text-center">
               <div className="font-display font-black text-2xl sm:text-3xl neon-text">
                 {item.prefix || ""}
-                {typeof item.value === "number" ? item.value : item.value}
+                {item.value}
                 {item.suffix}
               </div>
               <div className="text-xs text-text-muted font-mono uppercase tracking-wider mt-1">
@@ -95,6 +95,8 @@ function KeyNumbersStrip() {
 }
 
 export function Hero() {
+  const { content } = useLiveContent();
+  const { event, hero, keyNumbers } = content;
   return (
     <section id="top" className="relative min-h-screen flex flex-col">
 
@@ -195,14 +197,14 @@ export function Hero() {
 
             {/* Countdown */}
             <motion.div variants={fadeInUp}>
-              <CountdownDisplay />
+              <CountdownDisplay eventStartISO={event.eventStartISO} />
             </motion.div>
           </div>
         </motion.div>
       </div>
 
       {/* Key numbers strip */}
-      <KeyNumbersStrip />
+      <KeyNumbersStrip items={keyNumbers} />
     </section>
   );
 }

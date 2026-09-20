@@ -3,10 +3,13 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { schedule, importantDates } from "@/content/schedule";
+import { importantDates } from "@/content/schedule";
+import { useLiveContent } from "@/context/LiveContentContext";
 import { fadeInUp, staggerContainer } from "@/lib/motion";
 
 export function Schedule() {
+  const { content } = useLiveContent();
+  const schedule = content.schedule;
   const [activeTab, setActiveTab] = useState<"timeline" | "dates">("timeline");
 
   return (

@@ -1,7 +1,13 @@
+"use client";
+
+import { usePathname } from "next/navigation";
 import { event } from "@/content/event";
 import { YugmoraLogo } from "@/components/ui/YugmoraLogo";
 
 export function Footer() {
+  const pathname = usePathname();
+  if (pathname?.startsWith("/srikar")) return null;
+
   const year = new Date().getFullYear();
 
   return (

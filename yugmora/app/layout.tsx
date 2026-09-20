@@ -8,6 +8,7 @@ import { MobileRegisterFab } from "@/components/layout/MobileRegisterFab";
 import { Preloader } from "@/components/layout/Preloader";
 import { CRTOverlay } from "@/components/layout/CRTOverlay";
 import { SmoothScrollProvider } from "@/components/layout/SmoothScrollProvider";
+import { LiveContentProvider } from "@/context/LiveContentContext";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -70,15 +71,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           Skip to main content
         </a>
 
-        <SmoothScrollProvider>
-          <Preloader />
-          <CRTOverlay />
-          <Nav />
-          <ScrollProgressHUD />
-          <main id="main-content">{children}</main>
-          <Footer />
-          <MobileRegisterFab />
-        </SmoothScrollProvider>
+        <LiveContentProvider>
+          <SmoothScrollProvider>
+            <Preloader />
+            <CRTOverlay />
+            <Nav />
+            <ScrollProgressHUD />
+            <main id="main-content">{children}</main>
+            <Footer />
+            <MobileRegisterFab />
+          </SmoothScrollProvider>
+        </LiveContentProvider>
       </body>
     </html>
   );

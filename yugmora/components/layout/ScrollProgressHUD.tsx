@@ -1,11 +1,15 @@
 // components/layout/ScrollProgressHUD.tsx — HOUR 00/40 progress bar
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useScrollStore } from "@/hooks/useScrollStore";
 
 export function ScrollProgressHUD() {
+  const pathname = usePathname();
   const currentHour = useScrollStore((s) => s.currentHour);
   const progress = useScrollStore((s) => s.progress);
+
+  if (pathname?.startsWith("/srikar")) return null;
 
   return (
     <div

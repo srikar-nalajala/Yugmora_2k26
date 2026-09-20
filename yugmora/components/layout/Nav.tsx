@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useScrollStore } from "@/hooks/useScrollStore";
 import { event } from "@/content/event";
@@ -54,12 +55,15 @@ const navItems: NavItem[] = [
 ];
 
 export function Nav() {
+  const pathname = usePathname();
   const scrollY = useScrollStore((s) => s.scrollY);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [eventsOpen, setEventsOpen] = useState(false);
   const [mobileEventsOpen, setMobileEventsOpen] = useState(true);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const isScrolled = scrollY > 50;
+
+  if (pathname?.startsWith("/srikar")) return null;
 
   // Close dropdown on click outside
   useEffect(() => {

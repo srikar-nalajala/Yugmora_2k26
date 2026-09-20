@@ -3,7 +3,8 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { missions, domains } from "@/content/missions";
+import { domains } from "@/content/missions";
+import { useLiveContent } from "@/context/LiveContentContext";
 import { fadeInUp } from "@/lib/motion";
 import type { Domain, Mission } from "@/content/types";
 import { ShowcaseCarousel } from "@/components/showcase/ShowcaseCarousel";
@@ -11,6 +12,8 @@ import { MissionCard } from "@/components/showcase/MissionCard";
 import { MissionModal } from "@/components/showcase/MissionModal";
 
 export function Missions() {
+  const { content } = useLiveContent();
+  const missions = content.missions;
   const [activeDomain, setActiveDomain] = useState<Domain | "All">("All");
   const [selectedMission, setSelectedMission] = useState<Mission | null>(null);
 

@@ -3,17 +3,20 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { prizes, specialPrizes, judgingCriteria } from "@/content/prizes";
+import { specialPrizes, judgingCriteria } from "@/content/prizes";
+import { useLiveContent } from "@/context/LiveContentContext";
 import { fadeInUp, staggerContainer } from "@/lib/motion";
 
 export function Prizes() {
+  const { content } = useLiveContent();
+  const prizes = content.prizes;
   const [activeCriterion, setActiveCriterion] = useState<number | null>(null);
 
   // Podium order: First Runner-up (2nd), Winner (1st), Second Runner-up (3rd)
   const podiumOrder = [
-    { ...prizes[1], rank: "2nd", place: "First Runner-up", height: "h-64 sm:h-72", color: "from-neon-indigo/30 to-surface-1", border: "border-neon-indigo", badge: "🥈" },
-    { ...prizes[0], rank: "1st", place: "Champion Winner", height: "h-76 sm:h-88", color: "from-neon-blue/40 via-neon-magenta/30 to-surface-1", border: "border-neon-cyan", badge: "🏆" },
-    { ...prizes[2], rank: "3rd", place: "Second Runner-up", height: "h-56 sm:h-64", color: "from-neon-violet/30 to-surface-1", border: "border-neon-violet", badge: "🥉" },
+    { ...(prizes[1] || { award: "2nd Prize", reward: "Rs. 30,000" }), rank: "2nd", place: "First Runner-up", height: "h-64 sm:h-72", color: "from-neon-indigo/30 to-surface-1", border: "border-neon-indigo", badge: "🥈" },
+    { ...(prizes[0] || { award: "1st Prize", reward: "Rs. 50,000" }), rank: "1st", place: "Champion Winner", height: "h-76 sm:h-88", color: "from-neon-blue/40 via-neon-magenta/30 to-surface-1", border: "border-neon-cyan", badge: "🏆" },
+    { ...(prizes[2] || { award: "3rd Prize", reward: "Rs. 20,000" }), rank: "3rd", place: "Second Runner-up", height: "h-56 sm:h-64", color: "from-neon-violet/30 to-surface-1", border: "border-neon-violet", badge: "🥉" },
   ];
 
   return (

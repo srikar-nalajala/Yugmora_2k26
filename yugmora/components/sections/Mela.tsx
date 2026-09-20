@@ -7,13 +7,15 @@ import {
   melaSteps,
   melaChecklist,
   melaRoles,
-  melaCompanies,
 } from "@/content/mela";
+import { useLiveContent } from "@/context/LiveContentContext";
 import { event } from "@/content/event";
 import { fadeInUp, staggerContainer } from "@/lib/motion";
 import { trackEvent } from "@/lib/analytics";
 
 export function Mela() {
+  const { content } = useLiveContent();
+  const melaCompanies = content.melaCompanies;
   return (
     <section id="mela" className="py-20 lg:py-32 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
