@@ -74,7 +74,7 @@ export function Footer() {
         <hr className="border-line my-8" />
 
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-text-muted">
-          <span>© {year} Yugmora. All rights reserved.</span>
+          <span suppressHydrationWarning>© {year} Yugmora. All rights reserved.</span>
           <span className="font-mono text-xs">
             {event.college} • {event.city}
           </span>

@@ -64,8 +64,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       lang="en"
       className={`${montserrat.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable}`}
+      suppressHydrationWarning
     >
-      <body className="min-h-screen">
+      <body className="min-h-screen" suppressHydrationWarning>
         {/* Skip link for accessibility */}
         <a href="#main-content" className="skip-link">
           Skip to main content

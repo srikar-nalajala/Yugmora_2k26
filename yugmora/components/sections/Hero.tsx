@@ -9,9 +9,11 @@ import { trackEvent } from "@/lib/analytics";
 import { fadeInUp, staggerContainer } from "@/lib/motion";
 
 function CountdownDisplay({ eventStartISO }: { eventStartISO?: string }) {
-  const [countdown, setCountdown] = useState(getCountdown(eventStartISO));
+  const [mounted, setMounted] = useState(false);
+  const [countdown, setCountdown] = useState(() => getCountdown(eventStartISO));
 
   useEffect(() => {
+    setMounted(true);
     setCountdown(getCountdown(eventStartISO));
     if (!eventStartISO) return;
     const interval = setInterval(() => {
@@ -20,7 +22,7 @@ function CountdownDisplay({ eventStartISO }: { eventStartISO?: string }) {
     return () => clearInterval(interval);
   }, [eventStartISO]);
 
-  if (!eventStartISO) {
+  if (!mounted || !eventStartISO) {
     return (
       <div className="flex items-center gap-4 font-mono">
         {["Days", "Hours", "Minutes"].map((label) => (
