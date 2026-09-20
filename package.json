@@ -1,0 +1,11 @@
+{
+  "name": "yugmora-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix yugmora run dev",
+    "build": "npm --prefix yugmora run build",
+    "start": "npm --prefix yugmora run start",
+    "lint": "npm --prefix yugmora run lint"
+  }
+}
