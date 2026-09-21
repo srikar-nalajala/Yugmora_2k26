@@ -6,6 +6,7 @@ import { useLiveContent } from "@/context/LiveContentContext";
 import { YugmoraLogo } from "@/components/ui/YugmoraLogo";
 import { Domain, Mission, Workshop, Company, ScheduleItem, Prize } from "@/content/types";
 import { getCountdown, padTwo } from "@/lib/countdown";
+import { sanitizeSafeUrl } from "@/lib/security";
 
 const DOMAINS: Domain[] = [
   "AI/ML",
@@ -1373,10 +1374,10 @@ export default function SrikarAdminPage() {
 
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 font-mono text-xs text-text-muted">
                         <div>
-                          Email: <a href={`mailto:${sub.email}`} className="text-white hover:underline">{sub.email}</a>
+                          Email: <a href={sanitizeSafeUrl(`mailto:${sub.email}`)} className="text-white hover:underline">{sub.email}</a>
                         </div>
                         <div>
-                          Phone: <a href={`tel:${sub.phone}`} className="text-white hover:underline">{sub.phone}</a>
+                          Phone: <a href={sanitizeSafeUrl(`tel:${sub.phone}`)} className="text-white hover:underline">{sub.phone}</a>
                         </div>
                         <div>
                           Type: <span className="text-neon-pink font-bold">{sub.partnershipType}</span>

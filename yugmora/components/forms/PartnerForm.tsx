@@ -8,11 +8,16 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { trackEvent } from "@/lib/analytics";
 
 const partnerSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  company: z.string().min(2, "Company name is required"),
-  role: z.string().min(2, "Your role is required"),
-  email: z.string().email("Valid work email is required"),
-  phone: z.string().min(10, "Valid 10-digit phone number is required"),
+  name: z.string().trim().min(2, "Name must be at least 2 characters").max(100, "Name cannot exceed 100 characters"),
+  company: z.string().trim().min(2, "Company name is required").max(100, "Company name cannot exceed 100 characters"),
+  role: z.string().trim().min(2, "Your role is required").max(100, "Role cannot exceed 100 characters"),
+  email: z.string().trim().email("Valid work email is required").max(254, "Email is too long"),
+  phone: z
+    .string()
+    .trim()
+    .min(10, "Valid phone number is required (at least 10 characters)")
+    .max(20, "Phone number is too long")
+    .regex(/^[+0-9\s\-()]{10,20}$/, "Invalid phone format"),
   partnershipType: z.enum([
     "Problem Statement Partner",
     "Workshop / Speaker Partner",
@@ -20,7 +25,7 @@ const partnerSchema = z.object({
     "Prize / Sponsorship Partner",
     "Other / Custom",
   ]),
-  message: z.string().min(10, "Please share a brief message or proposal"),
+  message: z.string().trim().min(10, "Please share a brief message or proposal").max(2000, "Message cannot exceed 2000 characters"),
 });
 
 type PartnerFormData = z.infer<typeof partnerSchema>;

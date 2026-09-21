@@ -200,5 +200,7 @@ export function checkRateLimit(ip: string): {
 
 /** Get the stored passcode hash from environment */
 export function getPasscodeHash(): string | null {
-  return process.env.ADMIN_PASSCODE_HASH || null;
+  const raw = process.env.ADMIN_PASSCODE_HASH;
+  if (!raw) return null;
+  return raw.replace(/^["']|["']$/g, "").trim();
 }
